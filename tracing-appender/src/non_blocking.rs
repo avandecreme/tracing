@@ -241,7 +241,7 @@ impl Default for NonBlockingBuilder {
     }
 }
 
-impl std::io::Write for NonBlocking {
+impl std::io::Write for &NonBlocking {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         let buf_size = buf.len();
         if self.is_lossy {
@@ -264,6 +264,21 @@ impl std::io::Write for NonBlocking {
     #[inline]
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
         self.write(buf).map(|_| ())
+    }
+}
+
+impl std::io::Write for NonBlocking {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        (&(*self)).write(buf)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        (&(*self)).flush()
+    }
+
+    #[inline]
+    fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
+        (&(*self)).write_all(buf)
     }
 }
 
